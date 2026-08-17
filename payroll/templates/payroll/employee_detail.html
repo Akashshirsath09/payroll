@@ -1,0 +1,106 @@
+{% extends "payroll/base.html" %}
+{% block title %}{{ employee.full_name }} - PayrollHQ{% endblock %}
+{% block page_title %}Employee Details{% endblock %}
+
+{% block content %}
+{% if confirm_delete %}
+<div class="card" style="border:1px solid var(--danger);">
+  <div class="card-header"><h2>Confirm Deletion</h2></div>
+  <p>Are you sure you want to delete <strong>{{ employee.full_name }}</strong> ({{ employee.employee_id }})? This action cannot be undone and will remove related attendance, leave and payroll records.</p>
+  <form method="post" class="form-actions">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, Delete Employee</button>
+    <a href="{% url 'employee_detail' employee.pk %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endif %}
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">
+      <h2>{{ employee.full_name }}</h2>
+      <div class="actions-cell">
+        <a href="{% url 'employee_edit' employee.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+        <a href="{% url 'employee_delete' employee.pk %}" class="btn btn-danger btn-sm">Delete</a>
+      </div>
+    </div>
+    <ul class="detail-list">
+      <li><span class="k">Employee ID</span><span>{{ employee.employee_id }}</span></li>
+      <li><span class="k">Email</span><span>{{ employee.email }}</span></li>
+      <li><span class="k">Department</span><span>{{ employee.department.name }}</span></li>
+      <li><span class="k">Salary Band</span><span>{{ employee.salary_band.name }}</span></li>
+      <li><span class="k">Manager</span><span>{% if employee.manager %}{{ employee.manager.full_name }}{% else %}—{% endif %}</span></li>
+      <li><span class="k">Joining Date</span><span>{{ employee.joining_date }}</span></li>
+      <li><span class="k">Status</span><span>{% if employee.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-neutral">Inactive</span>{% endif %}</span></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2>Leave Requests</h2></div>
+    {% if leave_requests %}
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Start</th><th>End</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for leave in leave_requests %}
+          <tr>
+            <td>{{ leave.start_date }}</td>
+            <td>{{ leave.end_date }}</td>
+            <td>
+              {% if leave.status == 'PENDING' %}<span class="badge badge-warning">Pending</span>
+              {% elif leave.status == 'APPROVED' %}<span class="badge badge-success">Approved</span>
+              {% else %}<span class="badge badge-danger">Rejected</span>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="empty-state">No leave requests.</div>{% endif %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header"><h2>Attendance History (Last 20)</h2></div>
+    {% if attendance_records %}
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for rec in attendance_records %}
+          <tr>
+            <td>{{ rec.date }}</td>
+            <td>
+              {% if rec.status == 'PRESENT' %}<span class="badge badge-success">Present</span>
+              {% elif rec.status == 'ABSENT' %}<span class="badge badge-danger">Absent</span>
+              {% else %}<span class="badge badge-warning">Half Day</span>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="empty-state">No attendance records.</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2>Payroll History</h2></div>
+    {% if payroll_records %}
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Period</th><th>Net Salary</th></tr></thead>
+        <tbody>
+        {% for pr in payroll_records %}
+          <tr>
+            <td>{{ pr.get_month_display }} {{ pr.year }}</td>
+            <td>${{ pr.net_salary|floatformat:2 }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="empty-state">No payroll records.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

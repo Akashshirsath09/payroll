@@ -1,0 +1,39 @@
+{% extends "payroll/base.html" %}
+{% block title %}Salary Bands - PayrollHQ{% endblock %}
+{% block page_title %}Salary Bands{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2>All Salary Bands ({{ salary_bands.count }})</h2>
+    <a href="{% url 'salary_band_add' %}" class="btn btn-primary">+ Add Salary Band</a>
+  </div>
+
+  {% if salary_bands %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Min Salary</th><th>Max Salary</th><th>Employees</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for band in salary_bands %}
+        <tr>
+          <td>{{ band.name }}</td>
+          <td>${{ band.min_salary|floatformat:2 }}</td>
+          <td>${{ band.max_salary|floatformat:2 }}</td>
+          <td>{{ band.emp_count }}</td>
+          <td class="actions-cell">
+            <a href="{% url 'salary_band_edit' band.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <form method="post" action="{% url 'salary_band_delete' band.pk %}" style="display:inline;" data-confirm="Delete salary band '{{ band.name }}'?">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">No salary bands yet. Add your first salary band to get started.</div>
+  {% endif %}
+</div>
+{% endblock %}

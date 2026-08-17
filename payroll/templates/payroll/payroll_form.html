@@ -1,0 +1,41 @@
+{% extends "payroll/base.html" %}
+{% block title %}{{ title }} - PayrollHQ{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+{% if view_only %}
+<div class="card" style="max-width:560px;">
+  <ul class="detail-list">
+    <li><span class="k">Employee</span><span>{{ record.employee.full_name }}</span></li>
+    <li><span class="k">Period</span><span>{{ record.get_month_display }} {{ record.year }}</span></li>
+    <li><span class="k">Basic Salary</span><span>${{ record.basic_salary|floatformat:2 }}</span></li>
+    <li><span class="k">Allowances</span><span>${{ record.allowances|floatformat:2 }}</span></li>
+    <li><span class="k">Deductions</span><span>${{ record.deductions|floatformat:2 }}</span></li>
+    <li><span class="k">Net Salary</span><span><strong>${{ record.net_salary|floatformat:2 }}</strong></span></li>
+    <li><span class="k">Paid On</span><span>{{ record.paid_on|default:"—" }}</span></li>
+  </ul>
+  <div class="form-actions">
+    <a href="{% url 'payroll_edit' record.pk %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'payroll_list' %}" class="btn btn-secondary">Back to Payroll</a>
+  </div>
+</div>
+{% else %}
+<div class="card" style="max-width:600px;">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+        {{ field }}
+        {% for error in field.errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+    {% for error in form.non_field_errors %}<div class="form-error">{{ error }}</div>{% endfor %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Payroll Record</button>
+      <a href="{% url 'payroll_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

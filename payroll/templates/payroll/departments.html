@@ -1,0 +1,38 @@
+{% extends "payroll/base.html" %}
+{% block title %}Departments - PayrollHQ{% endblock %}
+{% block page_title %}Departments{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2>All Departments ({{ departments.count }})</h2>
+    <a href="{% url 'department_add' %}" class="btn btn-primary">+ Add Department</a>
+  </div>
+
+  {% if departments %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Description</th><th>Employees</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for dept in departments %}
+        <tr>
+          <td>{{ dept.name }}</td>
+          <td>{{ dept.description|default:"—" }}</td>
+          <td>{{ dept.emp_count }}</td>
+          <td class="actions-cell">
+            <a href="{% url 'department_edit' dept.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <form method="post" action="{% url 'department_delete' dept.pk %}" style="display:inline;" data-confirm="Delete department '{{ dept.name }}'?">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">No departments yet. Add your first department to get started.</div>
+  {% endif %}
+</div>
+{% endblock %}

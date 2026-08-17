@@ -1,0 +1,80 @@
+{% extends "payroll/base.html" %}
+{% block title %}Employees - PayrollHQ{% endblock %}
+{% block page_title %}Employees{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h2>All Employees ({{ employees.count }})</h2>
+    <a href="{% url 'employee_add' %}" class="btn btn-primary">+ Add Employee</a>
+  </div>
+
+  <form method="get" class="filter-bar">
+    <div class="form-group">
+      <label>Search</label>
+      <input type="text" name="q" class="form-control" placeholder="ID, name or email" value="{{ query }}">
+    </div>
+    <div class="form-group">
+      <label>Department</label>
+      <select name="department" class="form-control">
+        <option value="">All</option>
+        {% for dept in departments %}
+          <option value="{{ dept.pk }}" {% if selected_department == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select name="status" class="form-control">
+        <option value="" {% if selected_status == "" %}selected{% endif %}>All</option>
+        <option value="active" {% if selected_status == "active" %}selected{% endif %}>Active</option>
+        <option value="inactive" {% if selected_status == "inactive" %}selected{% endif %}>Inactive</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary">Filter</button>
+      <a href="{% url 'employee_list' %}" class="btn btn-secondary">Reset</a>
+    </div>
+  </form>
+
+  {% if employees %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Employee ID</th><th>Name</th><th>Email</th><th>Department</th>
+          <th>Salary Band</th><th>Joining Date</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for emp in employees %}
+        <tr>
+          <td>{{ emp.employee_id }}</td>
+          <td>{{ emp.full_name }}</td>
+          <td>{{ emp.email }}</td>
+          <td>{{ emp.department.name }}</td>
+          <td>{{ emp.salary_band.name }}</td>
+          <td>{{ emp.joining_date }}</td>
+          <td>{% if emp.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-neutral">Inactive</span>{% endif %}</td>
+          <td class="actions-cell">
+            <a href="{% url 'employee_detail' emp.pk %}" class="btn btn-outline btn-sm">View</a>
+            <a href="{% url 'employee_edit' emp.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <form method="post" action="{% url 'employee_toggle_active' emp.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline btn-sm">{% if emp.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+            </form>
+            <form method="post" action="{% url 'employee_delete' emp.pk %}" style="display:inline;" data-confirm="Delete employee '{{ emp.full_name }}'? This cannot be undone.">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">No employees found. Try adjusting your search or filters.</div>
+  {% endif %}
+</div>
+{% endblock %}

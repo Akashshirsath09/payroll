@@ -1,0 +1,145 @@
+{% extends "payroll/base.html" %}
+{% block title %}Dashboard - PayrollHQ{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="label">Total Employees</div>
+    <div class="value">{{ total_employees }}</div>
+  </div>
+  <div class="stat-card success">
+    <div class="label">Active Employees</div>
+    <div class="value">{{ active_employees }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Departments</div>
+    <div class="value">{{ total_departments }}</div>
+  </div>
+  <div class="stat-card warning">
+    <div class="label">Pending Leaves</div>
+    <div class="value">{{ pending_leaves }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Payroll Records</div>
+    <div class="value">{{ total_payroll_records }}</div>
+  </div>
+  <div class="stat-card success">
+    <div class="label">Total Payroll Amount</div>
+    <div class="value">${{ total_payroll_amount|floatformat:2 }}</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header"><h2>Recent Employees</h2><a href="{% url 'employee_list' %}" class="btn btn-outline btn-sm">View All</a></div>
+    {% if recent_employees %}
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Department</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for emp in recent_employees %}
+          <tr>
+            <td>{{ emp.employee_id }}</td>
+            <td><a href="{% url 'employee_detail' emp.pk %}">{{ emp.full_name }}</a></td>
+            <td>{{ emp.department.name }}</td>
+            <td>{% if emp.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-neutral">Inactive</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="empty-state">No employees yet.</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2>Recent Attendance</h2><a href="{% url 'attendance_list' %}" class="btn btn-outline btn-sm">View All</a></div>
+    {% if recent_attendance %}
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Employee</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for rec in recent_attendance %}
+          <tr>
+            <td>{{ rec.employee.full_name }}</td>
+            <td>{{ rec.date }}</td>
+            <td>
+              {% if rec.status == 'PRESENT' %}<span class="badge badge-success">Present</span>
+              {% elif rec.status == 'ABSENT' %}<span class="badge badge-danger">Absent</span>
+              {% else %}<span class="badge badge-warning">Half Day</span>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="empty-state">No attendance records yet.</div>{% endif %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header"><h2>Recent Leave Requests</h2><a href="{% url 'leave_list' %}" class="btn btn-outline btn-sm">View All</a></div>
+    {% if recent_leaves %}
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Employee</th><th>Dates</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for leave in recent_leaves %}
+          <tr>
+            <td>{{ leave.employee.full_name }}</td>
+            <td>{{ leave.start_date }} &rarr; {{ leave.end_date }}</td>
+            <td>
+              {% if leave.status == 'PENDING' %}<span class="badge badge-warning">Pending</span>
+              {% elif leave.status == 'APPROVED' %}<span class="badge badge-success">Approved</span>
+              {% else %}<span class="badge badge-danger">Rejected</span>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="empty-state">No leave requests yet.</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2>Recent Payroll</h2><a href="{% url 'payroll_list' %}" class="btn btn-outline btn-sm">View All</a></div>
+    {% if recent_payroll %}
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead><tr><th>Employee</th><th>Period</th><th>Net Salary</th></tr></thead>
+        <tbody>
+        {% for pr in recent_payroll %}
+          <tr>
+            <td>{{ pr.employee.full_name }}</td>
+            <td>{{ pr.get_month_display }} {{ pr.year }}</td>
+            <td>${{ pr.net_salary|floatformat:2 }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<div class="empty-state">No payroll records yet.</div>{% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><h2>Department Statistics</h2></div>
+  {% if department_stats %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead><tr><th>Department</th><th>Description</th><th>Employees</th></tr></thead>
+      <tbody>
+      {% for dept in department_stats %}
+        <tr>
+          <td>{{ dept.name }}</td>
+          <td>{{ dept.description|default:"—" }}</td>
+          <td>{{ dept.emp_count }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<div class="empty-state">No departments yet.</div>{% endif %}
+</div>
+{% endblock %}

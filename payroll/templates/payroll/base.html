@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Payroll Management System{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'payroll/css/style.css' %}">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><span class="dot"></span> PayrollHQ</div>
+      <nav class="sidebar-nav">
+        {% url 'dashboard' as url_dashboard %}
+        {% url 'employee_list' as url_employees %}
+        {% url 'department_list' as url_departments %}
+        {% url 'salary_band_list' as url_salary_bands %}
+        {% url 'attendance_list' as url_attendance %}
+        {% url 'leave_list' as url_leaves %}
+        {% url 'payroll_list' as url_payroll %}
+        {% url 'profile' as url_profile %}
+        <a href="{{ url_dashboard }}" class="{% if request.path == url_dashboard %}active{% endif %}">Dashboard</a>
+        <a href="{{ url_employees }}" class="{% if url_employees in request.path %}active{% endif %}">Employees</a>
+        <a href="{{ url_departments }}" class="{% if url_departments in request.path %}active{% endif %}">Departments</a>
+        <a href="{{ url_salary_bands }}" class="{% if url_salary_bands in request.path %}active{% endif %}">Salary Bands</a>
+        <a href="{{ url_attendance }}" class="{% if url_attendance in request.path %}active{% endif %}">Attendance</a>
+        <a href="{{ url_leaves }}" class="{% if url_leaves in request.path %}active{% endif %}">Leave Requests</a>
+        <a href="{{ url_payroll }}" class="{% if url_payroll in request.path %}active{% endif %}">Payroll</a>
+        <a href="{{ url_profile }}" class="{% if request.path == url_profile %}active{% endif %}">Profile</a>
+        <a href="/admin/" target="_blank">Admin</a>
+      </nav>
+      <div class="sidebar-footer">
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary" style="width:100%;">Logout</button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="mobile-toggle" aria-label="Toggle menu">&#9776;</button>
+          <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+        </div>
+        <div class="user-chip">
+          {% if user.is_authenticated %}
+            Signed in as <strong>&nbsp;{{ user.get_username }}</strong>
+          {% endif %}
+        </div>
+      </header>
+
+      <div class="content">
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+              <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'payroll/js/dashboard.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

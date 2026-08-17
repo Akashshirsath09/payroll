@@ -1,0 +1,101 @@
+{% extends "payroll/base.html" %}
+{% block title %}Payroll - PayrollHQ{% endblock %}
+{% block page_title %}Payroll{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="label">Total Basic</div>
+    <div class="value">${{ summary.total_basic|default:0|floatformat:2 }}</div>
+  </div>
+  <div class="stat-card success">
+    <div class="label">Total Allowances</div>
+    <div class="value">${{ summary.total_allowances|default:0|floatformat:2 }}</div>
+  </div>
+  <div class="stat-card danger">
+    <div class="label">Total Deductions</div>
+    <div class="value">${{ summary.total_deductions|default:0|floatformat:2 }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Total Net Salary</div>
+    <div class="value">${{ summary.total_net|default:0|floatformat:2 }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Payroll Records ({{ records.count }})</h2>
+    <a href="{% url 'payroll_add' %}" class="btn btn-primary">+ Add Payroll Record</a>
+  </div>
+
+  <form method="get" class="filter-bar">
+    <div class="form-group">
+      <label>Employee</label>
+      <select name="employee" class="form-control">
+        <option value="">All</option>
+        {% for emp in employees %}
+          <option value="{{ emp.pk }}" {% if selected_employee == emp.pk|stringformat:"s" %}selected{% endif %}>{{ emp.full_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Month</label>
+      <select name="month" class="form-control">
+        <option value="">All</option>
+        {% for value, label in month_choices %}
+          <option value="{{ value }}" {% if selected_month == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Year</label>
+      <select name="year" class="form-control">
+        <option value="">All</option>
+        {% for y in years %}
+          <option value="{{ y }}" {% if selected_year == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary">Filter</button>
+      <a href="{% url 'payroll_list' %}" class="btn btn-secondary">Reset</a>
+    </div>
+  </form>
+
+  {% if records %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Employee</th><th>Month</th><th>Year</th><th>Basic</th>
+          <th>Allowances</th><th>Deductions</th><th>Net Salary</th><th>Paid On</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for pr in records %}
+        <tr>
+          <td>{{ pr.employee.full_name }}</td>
+          <td>{{ pr.get_month_display }}</td>
+          <td>{{ pr.year }}</td>
+          <td>${{ pr.basic_salary|floatformat:2 }}</td>
+          <td>${{ pr.allowances|floatformat:2 }}</td>
+          <td>${{ pr.deductions|floatformat:2 }}</td>
+          <td><strong>${{ pr.net_salary|floatformat:2 }}</strong></td>
+          <td>{{ pr.paid_on|default:"—" }}</td>
+          <td class="actions-cell">
+            <a href="{% url 'payroll_detail' pr.pk %}" class="btn btn-outline btn-sm">View</a>
+            <a href="{% url 'payroll_edit' pr.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <form method="post" action="{% url 'payroll_delete' pr.pk %}" style="display:inline;" data-confirm="Delete this payroll record?">
+              {% csrf_token %}<button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">No payroll records found.</div>
+  {% endif %}
+</div>
+{% endblock %}

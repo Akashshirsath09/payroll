@@ -1,0 +1,34 @@
+{% extends "payroll/base.html" %}
+{% block title %}Profile - PayrollHQ{% endblock %}
+{% block page_title %}Profile{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:560px;">
+  <div class="card-header"><h2>Account Information</h2></div>
+  <ul class="detail-list">
+    <li><span class="k">Username</span><span>{{ user.get_username }}</span></li>
+    <li><span class="k">Email</span><span>{{ user.email|default:"—" }}</span></li>
+    <li><span class="k">Staff Access</span><span>{% if user.is_staff %}Yes{% else %}No{% endif %}</span></li>
+    <li><span class="k">Superuser</span><span>{% if user.is_superuser %}Yes{% else %}No{% endif %}</span></li>
+  </ul>
+</div>
+
+{% if employee %}
+<div class="card" style="max-width:560px;">
+  <div class="card-header"><h2>Linked Employee Record</h2></div>
+  <ul class="detail-list">
+    <li><span class="k">Employee ID</span><span>{{ employee.employee_id }}</span></li>
+    <li><span class="k">Full Name</span><span>{{ employee.full_name }}</span></li>
+    <li><span class="k">Department</span><span>{{ employee.department.name }}</span></li>
+    <li><span class="k">Salary Band</span><span>{{ employee.salary_band.name }}</span></li>
+  </ul>
+  <div class="form-actions">
+    <a href="{% url 'employee_detail' employee.pk %}" class="btn btn-primary">View Employee Record</a>
+  </div>
+</div>
+{% else %}
+<div class="card" style="max-width:560px;">
+  <div class="empty-state">This account is not linked to an employee record.</div>
+</div>
+{% endif %}
+{% endblock %}
